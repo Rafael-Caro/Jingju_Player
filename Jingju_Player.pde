@@ -26,6 +26,7 @@ String[] lines;
 int[] linesStart;
 int[] linesEnd;
 int[] lIndex; // lines index
+int[] linesBanshi;
 String tempoFile = "aria_tempocurve.csv";
 Table tempoData;
 int[] tempoTime;
@@ -105,21 +106,26 @@ void setup() {
   }
   
   banshiTable = loadTable(banshiFile);
-  banshi = new String[linesTable.getRowCount()];
-  banshiStart = new int[linesTable.getRowCount()];
-  for (int i = 0; i < banshiStart.length; i++) banshiStart[i] = -1;
-  banshiEnd = new int[linesTable.getRowCount()];
-  for (int i = 0; i < banshiEnd.length; i++) banshiEnd[i] = -1;
-  banshiIndex = 0;
+  banshi = new String[banshiTable.getRowCount()];
+  banshiStart = new int[banshiTable.getRowCount()];
+  //for (int i = 0; i < banshiStart.length; i++) banshiStart[i] = -1;
+  banshiEnd = new int[banshiTable.getRowCount()];
+  //for (int i = 0; i < banshiEnd.length; i++) banshiEnd[i] = -1;
+  //banshiIndex = 0;
+  for (int i = 0; i < banshiStart.length; i++) {
+    banshi[i] = banshiTable.getString(i, 0);
+    banshiStart[i] = int(banshiTable.getFloat(i, 1) * 1000);
+    banshiEnd[i] = int(banshiTable.getFloat(i, 2) * 1000);
+  }
+  
+  linesBanshi = new int[linesStart.length];
+  int bi = 0; // banshi index
   for (int i = 0; i < linesStart.length; i++) {
-    if (banshiIndex < banshiTable.getRowCount()) {
-      int bStart = int(banshiTable.getFloat(banshiIndex, 1) * 1000);
-      if (linesStart[i] >= bStart) {
-        banshi[i] = banshiTable.getString(banshiIndex, 0);
-        banshiStart[i] = bStart;
-        banshiEnd[i] = int(banshiTable.getFloat(banshiIndex, 2) * 1000);
-        banshiIndex += 1;
-      }
+    if ((linesStart[i] >= banshiStart[bi]) && (linesEnd[i] <= banshiEnd[bi])) {
+      linesBanshi[i] = bi;
+    } else {
+      bi++;
+      linesBanshi[i] = bi; 
     }
   }
   
@@ -194,10 +200,10 @@ void setup() {
   // Banshi index
   bIndex = new int[voicePlayer.length()];
   for (int i = 0; i < banshiStart.length; i++) {
-    if (banshiStart[i] > -1) bIndex[banshiStart[i]] = i+1;
+    bIndex[banshiStart[i]] = i+1;
   }
   for (int i = 0; i < banshiEnd.length; i++) {
-    if (banshiEnd[i] > -1) bIndex[banshiEnd[i]] = i+1;
+    bIndex[banshiEnd[i]] = i+1;
   }  
   int b = 0;
   boolean bWrite = false;
@@ -386,40 +392,46 @@ void draw() {
   }
   
   // Banshi boxes
-  int bbYi = 0; // banshi box Y index
-  int bbHi; // banshi box height index
-  int li = bIndex[tempoInstant]-1; // local index
-  for (int i = 1; i < banshiStart.length; i++) {
-    if (banshiStart[i] != -1) {
-      bbHi = i-bbYi;
-      if ((li >= 0) && (tempoInstant >= banshiStart[li]) && (tempoInstant <= banshiEnd[li])) {
-        fill(255, 128, 0, 150);
+  int currentBanshi = -1;
+  int bbYi = -1; // banshi box Y index
+  int bbHi = 0; // banshi box height index
+  for (int i = 0; i < linesBanshi.length; i++) {
+    if (linesBanshi[i] != currentBanshi) {
+      if (bbHi > 0) {
+        float banshiBoxY = lyricsBoxY+lineShift*(bbYi+1)-lineSize-lineAdjust/3;
+        if (bIndex[tempoInstant] == linesBanshi[i]) {
+          fill(255, 128, 0, 150);
+        } else {
+          noFill();
+        }
+        rect(lyricsBoxX, banshiBoxY, lineSize*8+lineAdjust, (lineSize+lineAdjust)*bbHi);
+        bbHi = 1;
       } else {
-        noFill();
+        bbHi++;
       }
-      float banshiBoxY = lyricsBoxY+lineShift*(bbYi+1)-lineSize-lineAdjust/3;
-      rect(lyricsBoxX, banshiBoxY, lineSize*8+lineAdjust, (lineSize+lineAdjust)*bbHi);
+      currentBanshi = linesBanshi[i];
       bbYi = i;
-      }
-    if (i == banshiStart.length-1) {
-      bbHi = i-bbYi+1;
-      if ((li >= 0) && (tempoInstant >= banshiStart[li]) && (tempoInstant <= banshiEnd[li])) {
-        fill(255, 128, 0, 150);
-      } else {
-        noFill();
-      }
-      float banshiBoxY = lyricsBoxY+lineShift*(bbYi+1)-lineSize-lineAdjust/3;
-      rect(lyricsBoxX, banshiBoxY, lineSize*8+lineAdjust, (lineSize+lineAdjust)*bbHi);
+    } else {
+      bbHi++;
     }
   }
+  float banshiBoxY = lyricsBoxY+lineShift*(bbYi+1)-lineSize-lineAdjust/3;
+  if (bIndex[tempoInstant] == linesBanshi[linesBanshi.length-1]+1) {
+    fill(255, 128, 0, 150);
+  } else {
+    noFill();
+  }
+  rect(lyricsBoxX, banshiBoxY, lineSize*8+lineAdjust, (lineSize+lineAdjust)*bbHi);
   
   // Banshi
   textFont(zhFont);
   fill(0);
   textSize(lineSize);
-  for (int i = 0; i < banshi.length; i++) {
-    if (banshi[i] != null) {
-      text(banshi[i], lineX, lyricsBoxY+lineShift*(i+1));
+  int newBanshi = -1;
+  for (int i = 0; i < linesBanshi.length; i++) {
+    if (linesBanshi[i] != newBanshi) {
+      text(banshi[linesBanshi[i]], lineX, lyricsBoxY+lineShift*(i+1));
+      newBanshi++;
     }
   }
   

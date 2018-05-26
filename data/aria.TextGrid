@@ -21,17 +21,9 @@ item []:
         name = "banshi" 
         xmin = 0 
         xmax = 148.20460317460316 
-        intervals: size = 3 
+        intervals: size = 1 
         intervals [1]:
             xmin = 0 
-            xmax = 78.00529936302011 
-            text = "【西皮原板】" 
-        intervals [2]:
-            xmin = 78.00529936302011 
-            xmax = 97.42584802408364 
-            text = "" 
-        intervals [3]:
-            xmin = 97.42584802408364 
             xmax = 148.20460317460316 
             text = "【西皮原板】" 
     item [3]:
