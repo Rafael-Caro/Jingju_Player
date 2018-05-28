@@ -10,24 +10,24 @@ String zhFontFile = "simkai.ttf";
 String enFontFile = "Roboto-Regular.ttf";
 PFont zhFont;
 PFont enFont;
-String titleFile = "sections/aria-title.csv";
+String titleFile = "sections/lsaria-title.csv";
 Table titleTable;
 String title;
-String banshiFile = "sections/aria-banshi.csv";
+String banshiFile = "sections/lsaria-banshi.csv";
 Table banshiTable;
 String[] banshi;
 int[] banshiStart;
 int[] banshiEnd;
 int[] bIndex; // banshi index
 int banshiIndex;
-String linesFile = "sections/aria-line.csv";
+String linesFile = "sections/lsaria-line.csv";
 Table linesTable;
 String[] lines;
 int[] linesStart;
 int[] linesEnd;
 int[] lIndex; // lines index
 int[] linesBanshi;
-String tempoFile = "aria_tempocurve.csv";
+String tempoFile = "lsaria_tempocurve.csv";
 Table tempoData;
 int[] tempoTime;
 float[] tempoValue;
@@ -64,8 +64,8 @@ int voiceX = tempoBoxX;
 int voiceY = playY+butRad+20;
 int accX = tempoBoxX;
 float accY = voiceY + sourceH + 20;
-String voiceFile = "voice.mp3";
-String accFile = "acc.mp3";
+String voiceFile = "lsvoice.mp3";
+String accFile = "lsacc.mp3";
 String banFile = "ban.mp3";
 String guFile = "gu.mp3";
 PImage voiceImg;
@@ -81,7 +81,7 @@ int volButtonH = 10;
 int vol0Line = volButtonW/2 + 3; // pixels longer than the button
 int ssd = 15; // source-slider distance
 int sliderW = 3;
-int latency = 500;
+int latency = 300;
 
 void setup() {
   frameRate(10000);
@@ -108,10 +108,7 @@ void setup() {
   banshiTable = loadTable(banshiFile);
   banshi = new String[banshiTable.getRowCount()];
   banshiStart = new int[banshiTable.getRowCount()];
-  //for (int i = 0; i < banshiStart.length; i++) banshiStart[i] = -1;
   banshiEnd = new int[banshiTable.getRowCount()];
-  //for (int i = 0; i < banshiEnd.length; i++) banshiEnd[i] = -1;
-  //banshiIndex = 0;
   for (int i = 0; i < banshiStart.length; i++) {
     banshi[i] = banshiTable.getString(i, 0);
     banshiStart[i] = int(banshiTable.getFloat(i, 1) * 1000);
@@ -137,8 +134,12 @@ void setup() {
   for (int i = 0; i < tempoData.getRowCount(); i++) { 
     tempoTime[i+1] = int(tempoData.getFloat(i, 0)*1000);
     tempoValue[i+1] = tempoData.getFloat(i, 1);
-    String b = str(tempoData.getFloat(i, 2)); // converts the beat value into string
-    beat[i+1] = int(b.charAt(b.length()-1))-48; 
+    float b = tempoData.getFloat(i, 2); // converts the beat value into string
+    if (b % 1 > 0) {
+      beat[i+1] = int(str(b).charAt(str(b).length()-1))-48;
+    } else {
+      beat[i+1] = 1;
+    }
   }
   tempoTime[0] = 0;
   tempoValue[0] = 0.0;
@@ -161,8 +162,9 @@ void setup() {
   voicePlayer = minim.loadFile(voiceFile);
   accPlayer = minim.loadFile(accFile);
   ban = minim.loadSample(banFile);
+  ban.setGain(5);
   gu = minim.loadSample(guFile);
-  gu.setGain(-5);
+  gu.setGain(-7);
   
   // Tempo curve
   int curveWeight = 2;
@@ -199,55 +201,36 @@ void setup() {
   
   // Banshi index
   bIndex = new int[voicePlayer.length()];
+  for (int i = 0; i < banshiEnd.length; i++) {
+    bIndex[banshiEnd[i]] = -1;
+  }
   for (int i = 0; i < banshiStart.length; i++) {
     bIndex[banshiStart[i]] = i+1;
   }
-  for (int i = 0; i < banshiEnd.length; i++) {
-    bIndex[banshiEnd[i]] = i+1;
-  }  
   int b = 0;
   boolean bWrite = false;
   for (int i = 0; i < bIndex.length; i++) {
     if (bIndex[i] == 0) {
-      if (bWrite) {
         bIndex[i] = b;
-      } else {
-        bIndex[i] = -1;
-      }
-    } else if (bIndex[i] != 0) {
-      if (bWrite) {
-        bWrite = false;
-      } else {
+    } else {
         b = bIndex[i];
-        bWrite = true;
-      }
     }
   }
   
   // Lines index
   lIndex = new int[voicePlayer.length()];
+  for (int i = 0; i < linesEnd.length; i++) {
+    lIndex[linesEnd[i]] = -1;
+  }
   for (int i = 0; i < linesStart.length; i++) {
     lIndex[linesStart[i]] = i+1;
   }
-  for (int i = 0; i < linesEnd.length; i++) {
-    lIndex[linesEnd[i]] = i+1;
-  }  
   int l = 0;
-  boolean lWrite = false;
   for (int i = 0; i < lIndex.length; i++) {
     if (lIndex[i] == 0) {
-      if (lWrite) {
         lIndex[i] = l;
-      } else {
-        lIndex[i] = -1;
-      }
-    } else if (lIndex[i] != 0) {
-      if (lWrite) {
-        lWrite = false;
-      } else {
+    } else {
         l = lIndex[i];
-        lWrite = true;
-      }
     }
   }
   
@@ -376,19 +359,21 @@ void draw() {
   
   // Lines boxes
   int lineX = lyricsBoxX+lineAdjust;
-  noStroke();
   for (int i = 0; i < linesStart.length; i++) {
     float boxX = map(linesStart[i], 0, voicePlayer.length(), tempoBoxX, width-tempoBoxX);
     float boxW = map(linesEnd[i], 0, voicePlayer.length(), tempoBoxX, width-tempoBoxX) - boxX;
     if (lIndex[tempoInstant] == i+1) {
+      noStroke();
       fill(255, 128, 0, 150);
       float lineBoxX = lyricsBoxX+lineSize*8+lineAdjust;
       float lineBoxY = lyricsBoxY+lineShift*(i+1)-lineSize-lineAdjust/3;
-      rect(lineBoxX, lineBoxY, width-lineBoxX-tempoBoxX, lineSize+lineAdjust);
+      rect(lineBoxX, lineBoxY, width-lineBoxX-tempoBoxX, lineSize+lineAdjust); // lyrics box
     } else {
       fill(150, 150);
     }
-    rect(boxX, height-tempoBoxX-tempoBoxH, boxW, tempoBoxH);
+    stroke(206, 167, 123);
+    strokeWeight(1);
+    rect(boxX, height-tempoBoxX-tempoBoxH, boxW, tempoBoxH); // tempo box
   }
   
   // Banshi boxes
@@ -404,6 +389,7 @@ void draw() {
         } else {
           noFill();
         }
+        noStroke();
         rect(lyricsBoxX, banshiBoxY, lineSize*8+lineAdjust, (lineSize+lineAdjust)*bbHi);
         bbHi = 1;
       } else {

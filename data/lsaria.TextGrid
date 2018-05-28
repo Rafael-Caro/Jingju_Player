@@ -1,0 +1,226 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 230.20297052154194 
+tiers? <exists> 
+size = 3 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "title" 
+        xmin = 0 
+        xmax = 230.20297052154194 
+        intervals: size = 1 
+        intervals [1]:
+            xmin = 0 
+            xmax = 230.20297052154194 
+            text = "“昔日有个三大贤”——《珠帘寨》（李克用）" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "banshi" 
+        xmin = 0 
+        xmax = 230.20297052154194 
+        intervals: size = 7 
+        intervals [1]:
+            xmin = 0 
+            xmax = 47.3131868468505 
+            text = "【西皮导板】" 
+        intervals [2]:
+            xmin = 47.3131868468505 
+            xmax = 48.611618244363356 
+            text = "" 
+        intervals [3]:
+            xmin = 48.611618244363356 
+            xmax = 150.6466595169117 
+            text = "【西皮原板】" 
+        intervals [4]:
+            xmin = 150.6466595169117 
+            xmax = 159.48346536576037 
+            text = "【西皮二六】" 
+        intervals [5]:
+            xmin = 159.48346536576037 
+            xmax = 205.33361693068147 
+            text = "【西皮流水】" 
+        intervals [6]:
+            xmin = 205.33361693068147 
+            xmax = 206.24251890894047 
+            text = "" 
+        intervals [7]:
+            xmin = 206.24251890894047 
+            xmax = 230.20297052154194 
+            text = "【西皮散板】" 
+    item [3]:
+        class = "IntervalTier" 
+        name = "line" 
+        xmin = 0 
+        xmax = 230.20297052154194 
+        intervals: size = 42 
+        intervals [1]:
+            xmin = 0 
+            xmax = 20.20905581835383 
+            text = "" 
+        intervals [2]:
+            xmin = 20.20905581835383 
+            xmax = 45.86983441985397 
+            text = "昔日里有个三大贤，" 
+        intervals [3]:
+            xmin = 45.86983441985397 
+            xmax = 59.11613148702522 
+            text = "" 
+        intervals [4]:
+            xmin = 59.11613148702522 
+            xmax = 68.2010940999184 
+            text = "刘关张结义在桃园。" 
+        intervals [5]:
+            xmin = 68.2010940999184 
+            xmax = 76.68565039130913 
+            text = "" 
+        intervals [6]:
+            xmin = 76.68565039130913 
+            xmax = 85.21787307897967 
+            text = "弟兄们徐州曾失散，" 
+        intervals [7]:
+            xmin = 85.21787307897967 
+            xmax = 94.13531489544137 
+            text = "" 
+        intervals [8]:
+            xmin = 94.13531489544137 
+            xmax = 103.8721708666046 
+            text = "古城相逢又团圆。" 
+        intervals [9]:
+            xmin = 103.8721708666046 
+            xmax = 111.51981514285816 
+            text = "" 
+        intervals [10]:
+            xmin = 111.51981514285816 
+            xmax = 119.07630091652814 
+            text = "关二爷马上呼三弟，" 
+        intervals [11]:
+            xmin = 119.07630091652814 
+            xmax = 128.71521860810813 
+            text = "" 
+        intervals [12]:
+            xmin = 128.71521860810813 
+            xmax = 137.88339196680863 
+            text = "张翼德在城楼怒发冲冠。" 
+        intervals [13]:
+            xmin = 137.88339196680863 
+            xmax = 145.9714958461454 
+            text = "" 
+        intervals [14]:
+            xmin = 145.9714958461454 
+            xmax = 150.6466595169117 
+            text = "耳边厢又听——" 
+        intervals [15]:
+            xmin = 150.6466595169117 
+            xmax = 153.99424615937144 
+            text = "   ——人呐喊，" 
+        intervals [16]:
+            xmin = 153.99424615937144 
+            xmax = 154.3838431319353 
+            text = "" 
+        intervals [17]:
+            xmin = 154.3838431319353 
+            xmax = 159.04457728519927 
+            text = "老蔡阳的人马来到了古城边。" 
+        intervals [18]:
+            xmin = 159.04457728519927 
+            xmax = 159.48346536576037 
+            text = "" 
+        intervals [19]:
+            xmin = 159.48346536576037 
+            xmax = 163.30728750388715 
+            text = "城楼上助你三通鼓，" 
+        intervals [20]:
+            xmin = 163.30728750388715 
+            xmax = 163.62473688893917 
+            text = "" 
+        intervals [21]:
+            xmin = 163.62473688893917 
+            xmax = 167.04112599163588 
+            text = "十面旌旗壮壮威严。" 
+        intervals [22]:
+            xmin = 167.04112599163588 
+            xmax = 167.5317295867163 
+            text = "" 
+        intervals [23]:
+            xmin = 167.5317295867163 
+            xmax = 171.3844107598478 
+            text = "哗喇喇打罢了头通鼓，" 
+        intervals [24]:
+            xmin = 171.3844107598478 
+            xmax = 171.77400773241166 
+            text = "" 
+        intervals [25]:
+            xmin = 171.77400773241166 
+            xmax = 174.3456080734981 
+            text = "关二爷提刀跨雕鞍。" 
+        intervals [26]:
+            xmin = 174.3456080734981 
+            xmax = 177.44795433650663 
+            text = "哗喇喇打罢了二通鼓，" 
+        intervals [27]:
+            xmin = 177.44795433650663 
+            xmax = 177.93134317283588 
+            text = "" 
+        intervals [28]:
+            xmin = 177.93134317283588 
+            xmax = 180.98599834887386 
+            text = "人有精神马又欢。" 
+        intervals [29]:
+            xmin = 180.98599834887386 
+            xmax = 181.3034477339259 
+            text = "" 
+        intervals [30]:
+            xmin = 181.3034477339259 
+            xmax = 184.0522708181265 
+            text = "哗喇喇打罢了三通鼓，" 
+        intervals [31]:
+            xmin = 184.0522708181265 
+            xmax = 184.44908254944153 
+            text = "" 
+        intervals [32]:
+            xmin = 184.44908254944153 
+            xmax = 187.3464296443017 
+            text = "蔡阳的人头落在马前。" 
+        intervals [33]:
+            xmin = 187.3464296443017 
+            xmax = 187.61337571809545 
+            text = "" 
+        intervals [34]:
+            xmin = 187.61337571809545 
+            xmax = 190.1760878281429 
+            text = "一来是老儿命该丧，" 
+        intervals [35]:
+            xmin = 190.1760878281429 
+            xmax = 190.45746341943902 
+            text = "" 
+        intervals [36]:
+            xmin = 190.45746341943902 
+            xmax = 193.288825899714 
+            text = "二来弟兄得团圆。" 
+        intervals [37]:
+            xmin = 193.288825899714 
+            xmax = 193.6134900435172 
+            text = "" 
+        intervals [38]:
+            xmin = 193.6134900435172 
+            xmax = 196.42381817918263 
+            text = "贤弟休回长安转，" 
+        intervals [39]:
+            xmin = 196.42381817918263 
+            xmax = 203.3818122389083 
+            text = "就在这沙陀过几年、" 
+        intervals [40]:
+            xmin = 203.3818122389083 
+            xmax = 206.44549852066677 
+            text = "" 
+        intervals [41]:
+            xmin = 206.44549852066677 
+            xmax = 226.66203453049394 
+            text = "落得个清闲。" 
+        intervals [42]:
+            xmin = 226.66203453049394 
+            xmax = 230.20297052154194 
+            text = "" 
