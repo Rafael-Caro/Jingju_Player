@@ -8,11 +8,15 @@ AudioSample gu;
 
 String zhFontFile = "simkai.ttf";
 String enFontFile = "Roboto-Regular.ttf";
+String itFontFile = "Roboto-Italic.ttf";
 PFont zhFont;
 PFont enFont;
+PFont itFont;
 String titleFile = "sections/lsaria-title.csv";
 Table titleTable;
 String title;
+String[] transTitle;
+int subTitleSize = 22;
 String banshiFile = "sections/lsaria-banshi.csv";
 Table banshiTable;
 String[] banshi;
@@ -25,6 +29,8 @@ Table linesTable;
 String[] lines;
 int[] linesStart;
 int[] linesEnd;
+String[] transLines;
+float transLineX;
 int[] lIndex; // lines index
 int[] linesBanshi;
 String tempoFile = "lsaria_tempocurve.csv";
@@ -43,15 +49,16 @@ int tempoBoxH = 80;
 int banshiHeaderH = 15;
 int tms = 15; // tempo marker size
 int tmY = tempoBoxX+tempoBoxH+tms+10; // to be subtracted from height
+String tm0 = "Scattered";
 int tlX; // tempo light x
 int tlY; // tempo light y
 int tlr = 7; // tempo light radius
 int tld; // tempo light duration
-int lyricsBoxX = 150;
+int lyricsBoxX = 140;
 int lyricsBoxY = 120;
 int tempLyrSp = 20; // vertical space between tempo and lyrics boxes
 int lyricsBoxH = lyricsBoxY+tempoBoxX+tempoBoxH+tempLyrSp; // to be subtracted from height
-int lineSize = 15;
+int lineSize = 16;
 int lineAdjust = 10;
 int lineShift = lineSize+lineAdjust;
 int linesSkip = 0;
@@ -61,6 +68,7 @@ int skipBarH = 20;
 int butRad = 17; // buttons radius
 int playX = tempoBoxX+butRad;
 int playY = lyricsBoxY+butRad;
+Boolean pause = false;
 int stopX = playX + 2*butRad + 10;
 int stopY = playY;
 int sourceW = 60;
@@ -93,22 +101,36 @@ void setup() {
   size(1080, 720);
   ellipseMode(RADIUS);
   
-  zhFont = createFont(zhFontFile, 50);
-  enFont = createFont(enFontFile, 50);
+  zhFont = createFont(zhFontFile, lineSize);
+  enFont = createFont(enFontFile, lineSize);
+  itFont = createFont(itFontFile, lineSize);
   
   // Title and sections
   titleTable = loadTable(titleFile);
   title = titleTable.getString(0, 0);
+  transTitle = new String[3];
+  for (int i = 1; i < 4; i++) {
+    transTitle[i-1] = titleTable.getString(0, i);
+  }
   
   linesTable = loadTable(linesFile);
   lines = new String[linesTable.getRowCount()];
   linesStart = new int[linesTable.getRowCount()];
   linesEnd = new int[linesTable.getRowCount()];
+  transLines = new String[linesTable.getRowCount()];
+  transLineX = 0;
   for (int i = 0; i < linesTable.getRowCount(); i++) {
     lines[i] = linesTable.getString(i, 0);
+    textFont(zhFont);
+    textSize(lineSize);
+    if (textWidth(lines[i]) > transLineX) {
+      transLineX = textWidth(lines[i]);
+    }
     linesStart[i] = int(linesTable.getFloat(i, 1) * 1000);
     linesEnd[i] = int(linesTable.getFloat(i, 2) * 1000);
+    transLines[i] = linesTable.getString(i, 3);
   }
+  transLineX += 5;
   
   banshiTable = loadTable(banshiFile);
   banshi = new String[banshiTable.getRowCount()];
@@ -255,7 +277,19 @@ void draw() {
   textFont(zhFont);
   textSize(30);
   fill(0);
-  text(title, 20, 50);
+  text(title, tempoBoxX, 55);
+  String aria = transTitle[0]+" ";
+  String play = " "+transTitle[1];
+  String character = transTitle[2];
+  textFont(enFont);
+  textSize(subTitleSize);
+  text(aria, tempoBoxX+20, 90); 
+  textFont(itFont);
+  textSize(subTitleSize);
+  text(play, tempoBoxX+20+textWidth(aria), 90);
+  textFont(enFont);
+  textSize(subTitleSize);
+  text(character, tempoBoxX+20+textWidth(aria)+textWidth(play), 90);
   
   // Volume
   voicePlayer.setGain(voiceVol);
@@ -271,13 +305,29 @@ void draw() {
     fill(0, 255, 0);
   }
   ellipse(playX, playY, butRad, butRad);
+  if (voicePlayer.isPlaying()) {
+    stroke(0);
+    strokeWeight(1);
+    fill(0, 200, 0);
+    rect(playX-butRad*0.4, playY-butRad*0.4, butRad*0.325, butRad*0.8);    
+    rect(playX+butRad*0.075, playY-butRad*0.4, butRad*0.325, butRad*0.8);
+  } else {
+    stroke(0);
+    strokeWeight(1);
+    fill(0, 150, 0);
+    triangle(playX-butRad*0.2, playY-butRad*0.4, playX-butRad*0.2, playY+butRad*0.4, playX+butRad*0.4, playY);
+  }
   // Stop button
   if (!voicePlayer.isPlaying() && voicePlayer.position() == 0) {
-    fill(70, 0, 0);
+    fill(150, 0, 0);
   } else {
     fill(255, 0, 0);
   }
   ellipse(stopX, stopY, butRad, butRad);
+  stroke(0);
+  strokeWeight(1);
+  fill(175, 0, 0);
+  rect(stopX-butRad*0.325, stopY-butRad*0.325, butRad*0.65, butRad*0.65);
   
   // Source buttons
   // Background and images
@@ -341,11 +391,11 @@ void draw() {
   fill(0);
   textSize(tms);
   if (tempoValue[index[tempoInstant]] == 0) {
-    tempoMark = "Scattered";
+    tempoMark = tm0;
   } else {
     tempoMark = nf(tempoValue[index[tempoInstant]], 3, 1) + " bpm"; 
   }
-  text(tempoMark, tempoBoxX, height-tmY, tms*5, tms+4);
+  text(tempoMark, tempoBoxX, height-tmY, textWidth(tm0)*1.1, tms*1.2);
   
   // Tempo light
   stroke(0);
@@ -370,35 +420,19 @@ void draw() {
   }
   tlX = tempoBoxX + 105;
   tlY = tmY-tlr;
-  ellipse(tempoBoxX+tms*5+tlr, height-tmY+(tms+4)/2, tlr, tlr);
+  ellipse(tempoBoxX+textWidth(tm0)*1.1+5+tlr, height-tmY+(tms*0.6), tlr, tlr);
   
   // Lines boxes...
   int lineX = lyricsBoxX+lineAdjust;
-      int tX = lyricsBoxX+lyricsBoxW/2; // triangle X
   // Omitting lines if more than possible in the box
   if (linesSkip > 0) {
     noStroke();
     if (tempoInstant > linesStart[linesStart.length-linesSkip-1]) {
       skipTop = linesSkip;
       skipBottom = 0;
-      // skip bar
-      fill(100, 50);
-      rect(lyricsBoxX, lyricsBoxY, lyricsBoxW, skipBarH);
-      float tY1 = lyricsBoxY+skipBarH*0.2; // triangle Y
-      float tY2 = lyricsBoxY+skipBarH*0.8; // triangle Y
-      fill(0, 100);
-      triangle(tX, tY1, tX-(skipBarH*0.8)/2, tY2, tX+(skipBarH*0.8)/2, tY2);
     } else {
       skipBottom = linesSkip;
       skipTop = 0;
-      // skip bar
-      int skipBarY = height-tempoBoxX-tempoBoxH-tempLyrSp-skipBarH;
-      fill(100, 50);
-      rect(lyricsBoxX, skipBarY, lyricsBoxW, skipBarH);
-      float tY1 = skipBarY+skipBarH*0.2; // triangle Y
-      float tY2 = skipBarY+skipBarH*0.8; // triangle Y
-      fill(0, 100);
-      triangle(tX, tY2, tX-(skipBarH*0.8)/2, tY1, tX+(skipBarH*0.8)/2, tY1);
     }
   }
   // ...in lyrics box
@@ -471,10 +505,11 @@ void draw() {
     }
     rect(banshiHeaderX, height-tempoBoxX-tempoBoxH, banshiHeaderW, banshiHeaderH);
     fill(0);
-    if (banshi[i].length()*banshiHeaderH*0.75 < banshiHeaderW) {
+    String banshiLabel = banshi[i];
+    if (textWidth(banshiLabel) < banshiHeaderW) {
       textFont(zhFont);
       textSize(banshiHeaderH*0.75);
-      text(banshi[i], banshiHeaderX+banshiHeaderH*0.05, height-tempoBoxX-tempoBoxH+banshiHeaderH*0.8);
+      text(banshiLabel, banshiHeaderX+banshiHeaderH*0.05, height-tempoBoxX-tempoBoxH+banshiHeaderH*0.8);
     } else {
       textFont(enFont);
       textSize(banshiHeaderH*0.75);
@@ -500,11 +535,12 @@ void draw() {
   line(lineX+lineSize*8, lyricsBoxY+lineAdjust, lineX+lineSize*8, height-lyricsBoxH-lineAdjust+lyricsBoxY);  
   
   // Lyrics lines
-  textFont(zhFont);
-  textSize(lineSize);
-  fill(0);
   for (int i = skipTop; i < lines.length-skipBottom; i++) {
+    textFont(zhFont);
+    fill(0);
     text(lines[i], lineX+lineSize*8+lineAdjust, lyricsBoxY+lineShift*(i-skipTop+1));
+    textFont(enFont);
+    text(transLines[i], lineX+lineSize*8+lineAdjust+transLineX, lyricsBoxY+lineShift*(i-skipTop+1));
   }
   
   // Draw tempo curve
@@ -516,6 +552,29 @@ void draw() {
   stroke(240, 245, 12);
   strokeWeight(3);
   line(cursorX, height-tempoBoxX-tempoBoxH, cursorX, height-tempoBoxX);
+  
+  // Skip bars
+  int tX = lyricsBoxX+lyricsBoxW/2; // triangle X
+  // Omitting lines if more than possible in the box
+  if (linesSkip > 0) {
+    noStroke();
+    if (tempoInstant > linesStart[linesStart.length-linesSkip-1]) {
+      fill(120, 70, 15, 50);
+      rect(lyricsBoxX, lyricsBoxY, lyricsBoxW, skipBarH);
+      float tY1 = lyricsBoxY+skipBarH*0.2; // triangle Y
+      float tY2 = lyricsBoxY+skipBarH*0.8; // triangle Y
+      fill(120, 70, 15, 200);
+      triangle(tX, tY1, tX-(skipBarH*0.8)/2, tY2, tX+(skipBarH*0.8)/2, tY2);
+    } else {
+      int skipBarY = height-tempoBoxX-tempoBoxH-tempLyrSp-skipBarH;
+      fill(120, 70, 15, 50);
+      rect(lyricsBoxX, skipBarY, lyricsBoxW, skipBarH);
+      float tY1 = skipBarY+skipBarH*0.2; // triangle Y
+      float tY2 = skipBarY+skipBarH*0.8; // triangle Y
+      fill(120, 70, 15, 200);
+      triangle(tX, tY2, tX-(skipBarH*0.8)/2, tY1, tX+(skipBarH*0.8)/2, tY1);
+    }
+  }
   
   // Lyrics box border  
   stroke(0);
