@@ -40,6 +40,7 @@ float tempoMin;
 float tempoMax;
 int tempoBoxX = 20;
 int tempoBoxH = 80;
+int banshiHeaderH = 15;
 int tms = 15; // tempo marker size
 int tmY = tempoBoxX+tempoBoxH+tms+10; // to be subtracted from height
 int tlX; // tempo light x
@@ -53,6 +54,10 @@ int lyricsBoxH = lyricsBoxY+tempoBoxX+tempoBoxH+tempLyrSp; // to be subtracted f
 int lineSize = 15;
 int lineAdjust = 10;
 int lineShift = lineSize+lineAdjust;
+int linesSkip = 0;
+int skipTop;
+int skipBottom;
+int skipBarH = 20;
 int butRad = 17; // buttons radius
 int playX = tempoBoxX+butRad;
 int playY = lyricsBoxY+butRad;
@@ -177,9 +182,9 @@ void setup() {
     float x = map(tempoTime[i], 0, voicePlayer.length(), tempoBoxX, width-tempoBoxX);
     float y;
     if (tempoValue[i] == 0) {
-      y = map(tempoMin, tempoMin, tempoMax, height-tempoBoxX, height-tempoBoxH-tempoBoxX)-curveWeight;
+      y = map(tempoMin, tempoMin, tempoMax+banshiHeaderH, height-tempoBoxX, height-tempoBoxH-tempoBoxX)-curveWeight;
     } else {
-      y = map(tempoValue[i], tempoMin, tempoMax, height-tempoBoxX, height-tempoBoxH-tempoBoxX);
+      y = map(tempoValue[i], tempoMin, tempoMax, height-tempoBoxX, height-tempoBoxH-tempoBoxX+banshiHeaderH);
     }
     tempoCurve.vertex(x, y);
   }
@@ -208,7 +213,6 @@ void setup() {
     bIndex[banshiStart[i]] = i+1;
   }
   int b = 0;
-  boolean bWrite = false;
   for (int i = 0; i < bIndex.length; i++) {
     if (bIndex[i] == 0) {
         bIndex[i] = b;
@@ -232,6 +236,12 @@ void setup() {
     } else {
         l = lIndex[i];
     }
+  }
+  
+  // Fit lines in the lyrics box
+  int maxLines = int((height-lyricsBoxH) / lineShift);
+  if (linesStart.length > maxLines) {
+    linesSkip = linesStart.length - maxLines;
   }
   
   voiceImg = loadImage("voice.png");
@@ -314,11 +324,12 @@ void draw() {
   rect(accX+sourceW+ssd+sliderW/2-volButtonW/2, accVolY-volButtonH/2, volButtonW, volButtonH);
   
   // Lirycs box background
+  int lyricsBoxW = width-lyricsBoxX-tempoBoxX;
   noStroke();
   fill(206, 167, 123);
-  rect(lyricsBoxX, lyricsBoxY, width-lyricsBoxX-tempoBoxX, height-lyricsBoxH);
+  rect(lyricsBoxX, lyricsBoxY, lyricsBoxW, height-lyricsBoxH);
     
-  // Tempo curve box background
+  // Tempo box background
   noStroke();
   fill(206, 167, 123);
   rect(tempoBoxX, height-tempoBoxX-tempoBoxH, width-(2*tempoBoxX), tempoBoxH);
@@ -326,11 +337,15 @@ void draw() {
   // Tempo marker
   int tempoInstant = voicePlayer.position();
   String tempoMark;
-  tempoMark = nf(tempoValue[index[tempoInstant]], 3, 1);
   textFont(enFont);
   fill(0);
   textSize(tms);
-  text(tempoMark+" bpm", tempoBoxX, height-tmY, tms*5, tms+4);
+  if (tempoValue[index[tempoInstant]] == 0) {
+    tempoMark = "Scattered";
+  } else {
+    tempoMark = nf(tempoValue[index[tempoInstant]], 3, 1) + " bpm"; 
+  }
+  text(tempoMark, tempoBoxX, height-tmY, tms*5, tms+4);
   
   // Tempo light
   stroke(0);
@@ -357,40 +372,75 @@ void draw() {
   tlY = tmY-tlr;
   ellipse(tempoBoxX+tms*5+tlr, height-tmY+(tms+4)/2, tlr, tlr);
   
-  // Lines boxes
+  // Lines boxes...
   int lineX = lyricsBoxX+lineAdjust;
-  for (int i = 0; i < linesStart.length; i++) {
-    float boxX = map(linesStart[i], 0, voicePlayer.length(), tempoBoxX, width-tempoBoxX);
-    float boxW = map(linesEnd[i], 0, voicePlayer.length(), tempoBoxX, width-tempoBoxX) - boxX;
+      int tX = lyricsBoxX+lyricsBoxW/2; // triangle X
+  // Omitting lines if more than possible in the box
+  if (linesSkip > 0) {
+    noStroke();
+    if (tempoInstant > linesStart[linesStart.length-linesSkip-1]) {
+      skipTop = linesSkip;
+      skipBottom = 0;
+      // skip bar
+      fill(100, 50);
+      rect(lyricsBoxX, lyricsBoxY, lyricsBoxW, skipBarH);
+      float tY1 = lyricsBoxY+skipBarH*0.2; // triangle Y
+      float tY2 = lyricsBoxY+skipBarH*0.8; // triangle Y
+      fill(0, 100);
+      triangle(tX, tY1, tX-(skipBarH*0.8)/2, tY2, tX+(skipBarH*0.8)/2, tY2);
+    } else {
+      skipBottom = linesSkip;
+      skipTop = 0;
+      // skip bar
+      int skipBarY = height-tempoBoxX-tempoBoxH-tempLyrSp-skipBarH;
+      fill(100, 50);
+      rect(lyricsBoxX, skipBarY, lyricsBoxW, skipBarH);
+      float tY1 = skipBarY+skipBarH*0.2; // triangle Y
+      float tY2 = skipBarY+skipBarH*0.8; // triangle Y
+      fill(0, 100);
+      triangle(tX, tY2, tX-(skipBarH*0.8)/2, tY1, tX+(skipBarH*0.8)/2, tY1);
+    }
+  }
+  // ...in lyrics box
+  for (int i = skipTop; i < linesStart.length-skipBottom; i++) {
     if (lIndex[tempoInstant] == i+1) {
       noStroke();
       fill(255, 128, 0, 150);
       float lineBoxX = lyricsBoxX+lineSize*8+lineAdjust;
-      float lineBoxY = lyricsBoxY+lineShift*(i+1)-lineSize-lineAdjust/3;
-      rect(lineBoxX, lineBoxY, width-lineBoxX-tempoBoxX, lineSize+lineAdjust); // lyrics box
+      float lineBoxY = lyricsBoxY+lineShift*(i-skipTop+1)-lineSize-lineAdjust/3;
+      rect(lineBoxX, lineBoxY, width-lineBoxX-tempoBoxX, lineSize+lineAdjust);
+    }
+  }
+  // ...in tempo box
+  for (int i = 0; i < linesStart.length; i++) {
+    float boxX = map(linesStart[i], 0, voicePlayer.length(), tempoBoxX, width-tempoBoxX);
+    float boxW = map(linesEnd[i], 0, voicePlayer.length(), tempoBoxX, width-tempoBoxX) - boxX;
+    if (lIndex[tempoInstant] == i+1) {
+      fill(255, 128, 0, 150);
     } else {
       fill(150, 150);
     }
     stroke(206, 167, 123);
     strokeWeight(1);
-    rect(boxX, height-tempoBoxX-tempoBoxH, boxW, tempoBoxH); // tempo box
+    rect(boxX, height-tempoBoxX-tempoBoxH, boxW, tempoBoxH);
   }
   
-  // Banshi boxes
+  // Banshi boxes...
+  // ...in lyrics box
   int currentBanshi = -1;
   int bbYi = -1; // banshi box Y index
   int bbHi = 0; // banshi box height index
-  for (int i = 0; i < linesBanshi.length; i++) {
+  for (int i = skipTop; i < linesBanshi.length-skipBottom; i++) {
     if (linesBanshi[i] != currentBanshi) {
       if (bbHi > 0) {
-        float banshiBoxY = lyricsBoxY+lineShift*(bbYi+1)-lineSize-lineAdjust/3;
+        float banshiBoxY = lyricsBoxY+lineShift*(bbYi-skipTop+1)-lineSize-lineAdjust/3;
         if (bIndex[tempoInstant] == linesBanshi[i]) {
           fill(255, 128, 0, 150);
         } else {
           noFill();
         }
         noStroke();
-        rect(lyricsBoxX, banshiBoxY, lineSize*8+lineAdjust, (lineSize+lineAdjust)*bbHi);
+        rect(lyricsBoxX, banshiBoxY, lineSize*8+lineAdjust, (lineShift)*bbHi);
         bbHi = 1;
       } else {
         bbHi++;
@@ -401,23 +451,46 @@ void draw() {
       bbHi++;
     }
   }
-  float banshiBoxY = lyricsBoxY+lineShift*(bbYi+1)-lineSize-lineAdjust/3;
-  if (bIndex[tempoInstant] == linesBanshi[linesBanshi.length-1]+1) {
+  float banshiBoxY = lyricsBoxY+lineShift*(bbYi-skipTop+1)-lineSize-lineAdjust/3;
+  if (bIndex[tempoInstant] == linesBanshi[linesBanshi.length-skipBottom-1]+1) {
     fill(255, 128, 0, 150);
   } else {
     noFill();
   }
-  rect(lyricsBoxX, banshiBoxY, lineSize*8+lineAdjust, (lineSize+lineAdjust)*bbHi);
+  rect(lyricsBoxX, banshiBoxY, lineSize*8+lineAdjust, (lineShift)*bbHi);
+  //...in tempo box
+  for (int i = 0; i < banshiStart.length; i++) {
+    float banshiHeaderX = map(banshiStart[i], 0, voicePlayer.length(), tempoBoxX, width-tempoBoxX);
+    float banshiHeaderW = map(banshiEnd[i], 0, voicePlayer.length(), tempoBoxX, width-tempoBoxX)-banshiHeaderX;
+    stroke(206, 167, 123);
+    strokeWeight(1);
+    if (bIndex[tempoInstant] == i+1) {
+      fill (255, 128, 0, 150);
+    } else {
+      fill(0, 50);
+    }
+    rect(banshiHeaderX, height-tempoBoxX-tempoBoxH, banshiHeaderW, banshiHeaderH);
+    fill(0);
+    if (banshi[i].length()*banshiHeaderH*0.75 < banshiHeaderW) {
+      textFont(zhFont);
+      textSize(banshiHeaderH*0.75);
+      text(banshi[i], banshiHeaderX+banshiHeaderH*0.05, height-tempoBoxX-tempoBoxH+banshiHeaderH*0.8);
+    } else {
+      textFont(enFont);
+      textSize(banshiHeaderH*0.75);
+      text("#"+str(i+1), banshiHeaderX+banshiHeaderH*0.05, height-tempoBoxX-tempoBoxH+banshiHeaderH*0.8);
+    }
+  }
   
   // Banshi
   textFont(zhFont);
   fill(0);
   textSize(lineSize);
   int newBanshi = -1;
-  for (int i = 0; i < linesBanshi.length; i++) {
+  for (int i = skipTop; i < linesBanshi.length-skipBottom; i++) {
     if (linesBanshi[i] != newBanshi) {
-      text(banshi[linesBanshi[i]], lineX, lyricsBoxY+lineShift*(i+1));
-      newBanshi++;
+      text(banshi[linesBanshi[i]], lineX, lyricsBoxY+lineShift*(i-skipTop+1));
+      newBanshi = linesBanshi[i];
     }
   }
   
@@ -430,8 +503,8 @@ void draw() {
   textFont(zhFont);
   textSize(lineSize);
   fill(0);
-  for (int i = 0; i < lines.length; i++) {
-    text(lines[i], lineX+lineSize*8+lineAdjust, lyricsBoxY+lineShift*(i+1));
+  for (int i = skipTop; i < lines.length-skipBottom; i++) {
+    text(lines[i], lineX+lineSize*8+lineAdjust, lyricsBoxY+lineShift*(i-skipTop+1));
   }
   
   // Draw tempo curve
@@ -448,7 +521,7 @@ void draw() {
   stroke(0);
   strokeWeight(1);
   noFill();
-  rect(lyricsBoxX, lyricsBoxY, width-lyricsBoxX-tempoBoxX, height-lyricsBoxH);
+  rect(lyricsBoxX, lyricsBoxY, lyricsBoxW, height-lyricsBoxH);
   
   // Tempo curve box border
   stroke(0);
