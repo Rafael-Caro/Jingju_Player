@@ -50,8 +50,8 @@ int banshiHeaderH = 15;
 int tms = 15; // tempo marker size
 int tmY = tempoBoxX+tempoBoxH+tms+10; // to be subtracted from height
 String tm0 = "Scattered";
-int tlX; // tempo light x
-int tlY; // tempo light y
+float tlX; // tempo light x
+float tlY; // tempo light y
 int tlr = 7; // tempo light radius
 int tld; // tempo light duration
 int lyricsBoxX = 140;
@@ -418,9 +418,9 @@ void draw() {
   } else {
     fill(100);
   }
-  tlX = tempoBoxX + 105;
-  tlY = tmY-tlr;
-  ellipse(tempoBoxX+textWidth(tm0)*1.1+5+tlr, height-tmY+(tms*0.6), tlr, tlr);
+  tlX = tempoBoxX+textWidth(tm0)*1.1+5+tlr;
+  tlY = height-tmY+(tms*0.6);
+  ellipse(tlX, tlY, tlr, tlr);
   
   // Lines boxes...
   int lineX = lyricsBoxX+lineAdjust;
