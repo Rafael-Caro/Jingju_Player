@@ -20,10 +20,10 @@ Next to the tempo box, the **metre marker** (5) indicates the metre by blinking 
 
 The **source buttons** allows for muting either the singing voice (6) or the accompanying jinghu (7). The sliders next to them adjust the volume of each of the sources.
 
-## Use
+## How to use the Jingju Player
 The Jingju Player is coded using **Processing** (3.3.7). The current repository contains the source code and the needed data to run it locally.
 
-To use the Jingju Player without Processing, an executable file can be downloaded, just for computers with Windows (either 32 or 64 bits). It does not need to be installed.
+The Jingju Player can be used in a Windows computer without the need of having Processing installed. For that, download this repository as a zip file by clicking at the green button "Clone or download," unzip it, and run the `Jingju_Player.exe` file from the `application.windows32` or `application.windows64` folder according to the 32 or 64 bits version of your Windows. This file do no requires installation.
 
 ## Aria source
 The aria used for this version of the Jingju Player is sung by 田昊 Tian Hao, a graduate student of the 中国戏曲学院 National Academy of Chinese Theatre Arts (Beijing). This recording, together with the recording of the jinghu accompaniment also used here, are part of the [**Jingju _a Cappella_ Recordings Collection**](https://doi.org/10.5281/zenodo.842229).
