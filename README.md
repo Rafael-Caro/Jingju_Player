@@ -4,6 +4,8 @@ _**An enhanced player for the understanding of jingju arias**_
 Understanding the elements of jingju music is an important requirement for its appreciation and enjoyment. This tool is designed with the aim of guiding the listener to special use of musical metre in jingju through the concept of _banshi_ and its relationship with the content of the lyrics. It also allows to explore the relationship between the singing voice and the instrumental accompaniment of the jinghu.
 
 ## Functionalities
+![Screenshot of the Jingju Player](https://github.com/Rafael-Caro/Jingju_Player/blob/master/data/screenshot.png)
+
 This preliminary version of the Jingju Player demonstrates its functionalities with the aria “昔日有个三大贤”——《珠帘寨》（李克用）"In ancient times where Three Great Sages," from _The Zhulian Stockade_ (Li Keyong).
 
 The **lyrics window** (1) offers, in the second column, the lyrics of the aria both in its original Chinese and in its English translation. The first column shows a label with _shengqiang_ and _banshi_. The line in parallel to this label and the following ones are sung in the _shengqiang_ and _banshi_ indicated by that label. To see the lyrics that do not fit in the lyrics window, the scroll down button (2) can be clicked.
